@@ -15,7 +15,7 @@ API do Projeto FinTrack - Gestão de despesas pessoais
 ### Endpoints 
 
 - [Listar Categorias](#listar-categorias)
-- [Cadastrar Categoria](#castrar-categoria)
+- [Cadastrar Categoria](#cadastrar-categoria)
 - [Detalhar Categoria](#detalhar-categoria)
 - [Apagar Categoria](#apagar-categoria)
 - [Atualizar Categoria](#atualizar-categoria)
