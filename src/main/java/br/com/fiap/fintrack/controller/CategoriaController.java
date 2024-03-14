@@ -1,14 +1,13 @@
 package br.com.fiap.fintrack.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,106 +15,71 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.fintrack.model.Categoria;
+import br.com.fiap.fintrack.repository.CategoriaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("categoria")
+@Slf4j
 public class CategoriaController {
 
-    Logger log = LoggerFactory.getLogger(getClass());
-
-    List<Categoria> repository = new ArrayList<>();
+    @Autowired
+    CategoriaRepository repository;
 
     @GetMapping
-    public List<Categoria> index(){
-        return repository;
+    public List<Categoria> index() {
+        return repository.findAll();
     }
 
     @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Categoria create(@RequestBody Categoria categoria){ // injeta + binding
-        log.info("cadastrando categoria {}", categoria );
-        repository.add(categoria);
-        return categoria;
+    @ResponseStatus(CREATED)
+    public Categoria create(@RequestBody Categoria categoria) { // injeta + binding
+        log.info("cadastrando categoria {}", categoria);
+        return repository.save(categoria);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Categoria> show(@PathVariable Long id){
+    public ResponseEntity<Categoria> show(@PathVariable Long id) {
         log.info("buscando categoria com id {} ", id);
 
-        // for(Categoria categoria : repository){
-        //     if (categoria.id().equals(id)) 
-        //         return ResponseEntity.ok(categoria);
-        // }
-        var categoriaEncontrada = getCategoriaById(id);
-
-
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(categoriaEncontrada.get());
+        return repository
+                .findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
 
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Object> destroy(@PathVariable Long id){
+    @ResponseStatus(NO_CONTENT)
+    public void destroy(@PathVariable Long id) {
         log.info("apagando categoria {}", id);
 
-        var categoriaEncontrada = getCategoriaById(id);
-
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        repository.remove(categoriaEncontrada.get());
-        return ResponseEntity.noContent().build();
+        verificarSeCategoriaExiste(id);
+        repository.deleteById(id);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Categoria> update(
-        @PathVariable Long id,
-        @RequestBody Categoria categoria
-    ){
+    public Categoria update( @PathVariable Long id, @RequestBody Categoria categoria) {
         log.info("atualizando categoria {} para {}", id, categoria);
-        // buscar a categoria antiga -> 404
-        var categoriaEncontrada = getCategoriaById(id);
 
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        var categoriaAntiga = categoriaEncontrada.get();
-
-        // criar categoria nova com os dados body
-        var categoriaNova = new Categoria(id, categoria.nome(), categoria.icone());
-
-        // remover categoria antiga
-        repository.remove(categoriaAntiga);
-
-        // add categoria nova
-        repository.add(categoriaNova);
-
-        return ResponseEntity.ok(categoriaNova);
+        verificarSeCategoriaExiste(id);
+        categoria.setId(id);
+        return repository.save(categoria);
+        
     }
 
-
-
-
-
-
-
-
-    private Optional<Categoria> getCategoriaById(Long id) {
-        var categoriaEncontrada = repository
-                                    .stream()
-                                    .filter( c -> c.id().equals(id))
-                                    .findFirst();
-        return categoriaEncontrada;
+    private void verificarSeCategoriaExiste(Long id) {
+        repository
+                .findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                NOT_FOUND,
+                                "Não existe categoria com o id informado"));
     }
 
-
-    
 }
