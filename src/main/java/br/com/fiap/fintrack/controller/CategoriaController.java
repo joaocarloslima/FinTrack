@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.util.List;
 
+import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.fintrack.model.Categoria;
 import br.com.fiap.fintrack.repository.CategoriaRepository;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -31,6 +33,9 @@ public class CategoriaController {
     @Autowired
     CategoriaRepository repository;
 
+    @Autowired
+    OpenAiChatClient gpt;
+
     @GetMapping
     public List<Categoria> index() {
         return repository.findAll();
@@ -38,8 +43,10 @@ public class CategoriaController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public Categoria create(@RequestBody Categoria categoria) { // injeta + binding
+    public Categoria create(@RequestBody @Valid Categoria categoria) { // injeta + binding
         log.info("cadastrando categoria {}", categoria);
+        var icone = gpt.call("Sugira um icone da biblioteca Material Icons para uma categoria chamada " + categoria.getNome() + ". Responda apenas com nome do icone");
+        categoria.setIcone(icone);
         return repository.save(categoria);
     }
 

@@ -3,6 +3,7 @@ package br.com.fiap.fintrack.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import br.com.fiap.fintrack.validation.TipoMovimentacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,7 +30,7 @@ public class Movimentacao {
 
     private LocalDate data;
 
-    // @TipoMovimentacao
+    @TipoMovimentacao
     private String tipo; //RECEITA | DESPESA
 
 }
