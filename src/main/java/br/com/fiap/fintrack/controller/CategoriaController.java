@@ -6,7 +6,6 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -68,7 +67,7 @@ public class CategoriaController {
     }
 
     @PutMapping("{id}")
-    public Categoria update( @PathVariable Long id, @RequestBody Categoria categoria) {
+    public Categoria update( @PathVariable Long id, @RequestBody @Valid Categoria categoria) {
         log.info("atualizando categoria {} para {}", id, categoria);
 
         verificarSeCategoriaExiste(id);
