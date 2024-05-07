@@ -2,6 +2,7 @@ package br.com.fiap.fintrack.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class MovimentacaoController {
     
     @GetMapping
     public Page<Movimentacao> index(
-        @PageableDefault(size = 5, sort = "data", direction = Direction.DESC) Pageable pageable,
+        @ParameterObject @PageableDefault(size = 5, sort = "data", direction = Direction.DESC) Pageable pageable,
         @RequestParam(required = false) String categoriaNome,
         @RequestParam(required = false) Integer mes
 

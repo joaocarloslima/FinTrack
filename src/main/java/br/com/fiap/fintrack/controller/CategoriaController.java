@@ -24,6 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.fintrack.model.Categoria;
 import br.com.fiap.fintrack.repository.CategoriaRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("categoria")
 @Slf4j
 @CacheConfig(cacheNames = "categorias")
+@Tag(name = "categorias")
 public class CategoriaController {
 
     @Autowired
@@ -38,12 +43,20 @@ public class CategoriaController {
 
     @GetMapping
     @Cacheable
+    @Operation(
+        summary = "Listar Categorias",
+        description = "Retorna um array com as categorias do usuário autenticado."
+    )
     public List<Categoria> index() {
         return repository.findAll();
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Categoria criada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Validação falhou. Verifique o corpo da requisição")
+    })
     @CacheEvict(allEntries = true)
     public Categoria create(@RequestBody @Valid Categoria categoria) { // injeta + binding
         log.info("cadastrando categoria {}", categoria);
