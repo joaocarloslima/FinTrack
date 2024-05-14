@@ -3,8 +3,14 @@ package br.com.fiap.fintrack.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.springframework.hateoas.EntityModel;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import br.com.fiap.fintrack.controller.MovimentacaoController;
 import br.com.fiap.fintrack.validation.TipoMovimentacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Movimentacao {
+public class Movimentacao extends EntityModel<Movimentacao> {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
@@ -45,5 +51,14 @@ public class Movimentacao {
 
     @ManyToOne
     private Categoria categoria;
+
+    public EntityModel<Movimentacao> toEntityModel() {
+        return EntityModel.of(
+            this,
+            linkTo(methodOn(MovimentacaoController.class).show(id)).withSelfRel(),
+            linkTo(methodOn(MovimentacaoController.class).destroy(id)).withRel("delete"),
+            linkTo(methodOn(MovimentacaoController.class).index(null, null, null)).withRel("contents")
+        );
+    }
 
 }
